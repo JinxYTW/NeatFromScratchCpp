@@ -1,0 +1,8 @@
+Genome ID: 21
+Neurons:
+Neuron ID: 0, Bias: -1.91238
+Neuron ID: 1, Bias: 1.34097
+Neuron ID: 2, Bias: 0
+Neuron ID: 3, Bias: 0
+Neuron ID: 4, Bias: 0
+Links:
