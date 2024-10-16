@@ -218,38 +218,61 @@ void mutate_add_neuron(Genome &genome)
     if (genome.links.empty()) {
         return;
     }
+
     neat::LinkGene link_to_split = rng.choose_random(genome.links);  // Choisir un lien à diviser
-    link_to_split.is_enabled = false;  // Désactiver le lien existant
+
+    // Désactiver le lien existant
+    link_to_split.is_enabled = false;
+
+    // Retirer le lien divisé en fonction de son LinkId
+    genome.links.erase(std::remove_if(genome.links.begin(), genome.links.end(),
+        [&link_to_split](const neat::LinkGene &link) {
+            return link.link_id == link_to_split.link_id;
+        }), genome.links.end());
 
     NeuronMutator neuron_mutator;  // Instancier NeuronMutator
     neat::NeuronGene new_neuron = neuron_mutator.new_neuron();  // Créer un nouveau neurone
+    new_neuron.neuron_id = genome.generate_next_neuron_id();  // Générer un nouvel ID de neurone
     genome.add_neuron(new_neuron);  // Ajouter le nouveau neurone
 
     neat::LinkId link_id = link_to_split.link_id;
     double weight = link_to_split.weight;
 
-    genome.add_link(neat::LinkGene{{link_id.input_id}, 1.0, true});  // Ajouter un lien du neurone d'entrée au nouveau neurone
-    genome.add_link(neat::LinkGene{{new_neuron.neuron_id, link_id.output_id}, weight, true});  // Ajouter un lien du nouveau neurone au neurone de sortie
+    // Ajouter un lien du neurone d'entrée au nouveau neurone
+    genome.add_link(neat::LinkGene{{link_id.input_id, new_neuron.neuron_id}, 1.0, true});  
+    // Ajouter un lien du nouveau neurone au neurone de sortie
+    genome.add_link(neat::LinkGene{{new_neuron.neuron_id, link_id.output_id}, weight, true});  
 }
 
+
+
 void mutate_remove_neuron(Genome &genome) {
-    if (genome.neurons.empty()) {
-        return;
+    // Vérifier qu'il reste au moins 2 neurones cachés
+    int hidden_neuron_count = std::count_if(genome.neurons.begin(), genome.neurons.end(), 
+        [](const NeuronGene &neuron) { 
+            NeatConfig config;
+            return neuron.is_hidden(neuron.neuron_id,config);  // Assurez-vous que la méthode is_hidden() est définie pour détecter les neurones cachés
+        });
+
+    if (hidden_neuron_count < 2) {
+        return;  // Ne rien faire s'il reste moins de 2 neurones cachés
     }
-    
+
+    // Choisir un neurone caché aléatoire
     RNG rng;
     auto neuron_it = choose_random_hidden(genome.neurons);
 
     // Effacer les liens qui pointent vers ce neurone
     genome.links.erase(std::remove_if(genome.links.begin(), genome.links.end(), 
         [neuron_it](const LinkGene &link) {
-            return link.has_neuron(*neuron_it);  // Utilisez le neurone dereferencé
+            return link.has_neuron(*neuron_it);  // Utilisez le neurone déférencé
         }),
         genome.links.end());
 
     // Supprimer le neurone
     genome.neurons.erase(neuron_it);  // Utilisez l'itérateur ici
 }
+
 
 double clamp(double x){
     DoubleConfig config;
