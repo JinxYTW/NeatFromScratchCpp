@@ -10,10 +10,10 @@ public:
     ComputeFitness(RNG &rng);
 
     // Surcharge de l'opérateur () pour évaluer la fitness d'un génome
-    double operator()(const Genome &genome) const;
+    double operator()(const Genome &genome,int ant_id) const;
 
     // Méthode pour évaluer la fitness d'un génome (si besoin d'une version nommée)
-    double evaluate(const Genome &genome) const;
+    double evaluate(const Genome &genome, int ant_id) const;
 
 private:
     RNG &rng;  // Référence au générateur RNG utilisé pour l'évaluation

@@ -1,10 +1,15 @@
 #include "Utils.h"
 #include <fstream>
 #include <iostream>
-#include "neat.h"
+#include "Neat.h"
 #include <random>
 
-// Implémentation de la fonction save
+/**
+ * @brief Sauvegarde un génome dans un fichier.
+ * 
+ * @param genome Le génome à sauvegarder.
+ * @param filename Le nom du fichier dans lequel sauvegarder le génome.
+ */
 void save(const Genome &genome, const std::string &filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
@@ -31,44 +36,44 @@ void save(const Genome &genome, const std::string &filename) {
     std::cout << "Genome saved to " << filename << std::endl;
 }
 
-std::vector<double> get_game_state() {
+/**
+ * @brief Récupère l'état actuel du jeu pour une fourmi spécifique.
+ * 
+ * @param ant_id L'identifiant de la fourmi.
+ * @return Un vecteur contenant la position X, la position Y, l'altitude et la distance à l'objectif.
+ */
+std::vector<double> get_game_state(int ant_id) {
     std::vector<double> game_state;
-    game_state.push_back(0.0);  // Exemple de données d'état du jeu
 
-    // Créer un générateur aléatoire
-    std::random_device rd;                         // Générateur de nombres aléatoires
-    std::mt19937 gen(rd());                        // Mersenne Twister pour une bonne qualité de génération
-    std::uniform_real_distribution<> dist(0.0, 1.0); // Distribution aléatoire entre 0.0 et 1.0
-    
-    // Remplir le vecteur avec des nombres aléatoires
-    for (int i = 0; i < 2; ++i) {
-        game_state.push_back(dist(gen));
-    }
+    // Récupérer l'état spécifique de la fourmi 'ant_id'
+    game_state.push_back(get_ant_position_x(ant_id)); // Position X de la fourmi
+    game_state.push_back(get_ant_position_y(ant_id)); // Position Y de la fourmi
+    game_state.push_back(get_altitude(ant_id));       // Altitude de la fourmi
+    game_state.push_back(get_distance_to_goal(ant_id)); // Distance à l'objectif
 
-    // Exemple d'état du jeu, vous devez adapter cela à votre jeu spécifique
-    //game_state.push_back(player_position_x);
-    //game_state.push_back(player_position_y);
-    //game_state.push_back(enemy_distance);
-    //game_state.push_back(player_health);
-
-    return game_state;  // Retourne un vecteur représentant l'état du jeu
+    return game_state;
 }
 
-void perform_actions(const std::vector<double>& actions) {
-    // Exemple d'actions à partir des sorties du réseau de neurones
-    if (actions[0] > 0.5) {
-        std::cout << "Jump!" << std::endl;
-        
-    } else {
-        std::cout << "Do nothing." << std::endl;
-         
-    }
+/**
+ * @brief Effectue une action pour une fourmi en fonction des valeurs fournies.
+ * 
+ * @param actions Un vecteur de valeurs pour les actions de déplacement (haut, bas, gauche, droite).
+ * @param ant_id L'identifiant de la fourmi.
+ */
+void perform_actions(const std::vector<double>& actions, int ant_id) {
+    double move_up = actions[0]; 
+    double move_down = actions[1];
+    double move_left = actions[2];
+    double move_right = actions[3];
 
-    if (actions[1] > 0.5) {
-        std::cout << "Cry!" << std::endl;
-         
-    } else {
-        std::cout << "Keep calm." << std::endl;
+    // Choisir l'action avec la plus grande valeur
+    if (move_right > move_left && move_right > move_up && move_right > move_down) {
+        move_ant_right(ant_id);
+    } else if (move_left > move_right && move_left > move_up && move_left > move_down) {
+        move_ant_left(ant_id);
+    } else if (move_up > move_down && move_up > move_right && move_up > move_left) {
+        move_ant_up(ant_id);
+    } else if (move_down > move_up && move_down > move_right && move_down > move_left) {
+        move_ant_down(ant_id);
     }
 }
-
