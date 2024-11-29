@@ -2,16 +2,23 @@
 #ifndef NEAT_H
 #define NEAT_H
 
+#include "Neat.h"
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
 #include "Activation.h"
-#include "Genome.h"
 #include "GenomeIndexer.h"
 #include "NeatConfig.h"
+#include <memory>
+
+class Genome;
+
+
 
 namespace neat
 {
+    
+    
 
     // Structure d'un neurone dans le génome
     struct NeuronGene
@@ -69,17 +76,17 @@ namespace neat
 
     // Structure pour représenter un individu
     struct Individual
-    {
-        Genome genome;
-        bool fitness_computed;
-        double fitness;
+{
+    std::shared_ptr<Genome> genome;  // Utilise std::shared_ptr pour gérer le cycle de vie
+    bool fitness_computed;
+    double fitness;
 
-        Individual()
-            : genome(), fitness_computed(false), fitness(0.0) {}
+    Individual()
+        : genome(nullptr), fitness_computed(false), fitness(0.0) {}
 
-        Individual(const Genome &genome)
-            : genome(genome), fitness_computed(false), fitness(0.0) {}
-    };
+    Individual(std::shared_ptr<Genome> genome)
+        : genome(std::move(genome)), fitness_computed(false), fitness(0.0) {}
+};
 
     struct DoubleConfig
     {
@@ -139,6 +146,10 @@ namespace neat
          * @return Genome Le génome de la descendance après un croisement.
          */
         Genome crossover(const Individual &dominant, const Individual &recessive, int child_genome_id);
+
+        Genome alt_crossover(const std::shared_ptr<Genome>& dominant, 
+                       const std::shared_ptr<Genome>& recessive, 
+                       int child_genome_id);
 
     private:
         GenomeIndexer m_genome_indexer;

@@ -13,6 +13,8 @@
 class Population
 {
 public:
+
+   
    /**
     * @brief Constructeur de la classe Population.
     *
@@ -68,6 +70,8 @@ public:
     */
    std::vector<neat::Individual> reproduce();
 
+   std::vector<neat::Individual> reproduce_from_genomes(const std::vector<std::shared_ptr<Genome>>& genomes);
+
    /**
     * @brief Trie les individus par fitness en ordre décroissant.
     *
@@ -88,6 +92,19 @@ public:
     */
    void update_best();
 
+
+/**
+ * @brief Remplace la population actuelle par une nouvelle génération d'individus.
+ *
+ * Cette méthode prend en entrée un vecteur de nouveaux individus, 
+ * et met à jour la population en remplaçant les anciens individus 
+ * par les nouveaux tout en conservant les informations nécessaires.
+ *
+ * @param new_generation Le vecteur contenant les nouveaux individus.
+ */
+   void replace_population(std::vector<neat::Individual> new_generation);
+
+   
 private:
    NeatConfig config;
    RNG &rng;
